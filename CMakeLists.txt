@@ -1,6 +1,10 @@
-﻿cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required(VERSION 3.16)
+set(CMAKE_CXX_STANDARD 17)
 
-project ("VulkanHelloTriangle")
+if (WIN32)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin/Windows)
+endif()
 
-add_subdirectory ("VulkanHelloTriangle")
+project("VulkanHelloTriangle")
 
+add_subdirectory("VulkanHelloTriangle")
