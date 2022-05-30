@@ -4,10 +4,9 @@
 
 int main()
 {
-	nk::HelloTriangleApplication app{};
-
 	try
 	{
+		nk::HelloTriangleApplication app;
 		app.Run();
 	}
 	catch (const std::exception& e)

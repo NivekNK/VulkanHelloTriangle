@@ -1,25 +1,25 @@
 #pragma once
 
-struct GLFWwindow;
+#include <memory>
+
+#include "Window.h"
+#include <vulkan/vulkan.hpp>
 
 namespace nk
 {
 	class HelloTriangleApplication
 	{
 	public:
-		HelloTriangleApplication(const unsigned int width = 800, const unsigned int height = 600)
-			: m_Width(width), m_Height(height) {}
-
 		void Run();
 
 	private:
-		void InitWindow();
 		void InitVulkan();
-		void MainLoop();
+		void Update();
 		void Cleanup();
 
-		unsigned int m_Width;
-		unsigned int m_Height;
-		GLFWwindow* m_Window;
+		void CreateInstance();
+
+		vk::UniqueInstance m_Instance;
+		std::unique_ptr<Window> m_Window;
 	};
 }

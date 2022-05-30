@@ -1,44 +1,64 @@
 #include "HelloTriangleApplication.h"
 
-#define GLFW_INCLUDE_NONE
-#include <vulkan/vulkan.hpp>
-#include <GLFW/glfw3.h>
+#include <iostream>
+#include <VkBootstrap.h>
 
 namespace nk
 {
 	void HelloTriangleApplication::Run()
 	{
-		InitWindow();
+		m_Window = std::make_unique<Window>();
+
 		InitVulkan();
-		MainLoop();
+		Update();
 		Cleanup();
 	}
-
-	void HelloTriangleApplication::InitWindow()
-	{
-		glfwInit();
-
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-		m_Window = glfwCreateWindow(m_Width, m_Height, "VulkanTriangleApplication", nullptr, nullptr);
-	}
-
+	
 	void HelloTriangleApplication::InitVulkan()
 	{
+		CreateInstance();
 	}
 
-	void HelloTriangleApplication::MainLoop()
+	void HelloTriangleApplication::Update()
 	{
-		while (!glfwWindowShouldClose(m_Window))
+		while (!m_Window->ShouldClose())
 		{
-			glfwPollEvents();
+			m_Window->Update();
 		}
 	}
 
 	void HelloTriangleApplication::Cleanup()
 	{
-		glfwDestroyWindow(m_Window);
-		glfwTerminate();
+	}
+
+	void HelloTriangleApplication::CreateInstance()
+	{
+		vkb::InstanceBuilder instanceBuilder;
+		auto instanceBuilderRet = instanceBuilder
+			.set_app_name("Hello Triangle")
+			.set_engine_name("No Engine")
+			.require_api_version(VK_API_VERSION_1_0)
+			.build();
+		if (!instanceBuilderRet)
+		{
+			std::cerr << "Failed to create Vulkan instance. Error: " << instanceBuilderRet.error().message() << std::endl;
+			return;
+		}
+
+		const vkb::Instance vkbInstance = instanceBuilderRet.value();
+		m_Instance = vk::UniqueInstance(vkbInstance.instance);
+
+		auto systemInfoRet = vkb::SystemInfo::get_system_info();
+		if (!systemInfoRet)
+		{
+			std::cerr << "Failed to get system info. Error: " << systemInfoRet.error().message() << std::endl;
+			return;
+		}
+
+		std::cout << "Available extensions:" << std::endl;
+		for (const auto& extension : systemInfoRet.value().available_extensions)
+		{
+			std::cout << "\t" << extension.extensionName << std::endl;
+		}
 	}
 }
