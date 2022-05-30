@@ -1,7 +1,6 @@
 #include "HelloTriangleApplication.h"
 
 #include <iostream>
-#include <VkBootstrap.h>
 
 namespace nk
 {
@@ -17,6 +16,7 @@ namespace nk
 	void HelloTriangleApplication::InitVulkan()
 	{
 		CreateInstance();
+		SelectPhysicalDevice();
 	}
 
 	void HelloTriangleApplication::Update()
@@ -29,6 +29,7 @@ namespace nk
 
 	void HelloTriangleApplication::Cleanup()
 	{
+		vkb::destroy_instance(m_Instance);
 	}
 
 	void HelloTriangleApplication::CreateInstance()
@@ -38,6 +39,21 @@ namespace nk
 			.set_app_name("Hello Triangle")
 			.set_engine_name("No Engine")
 			.require_api_version(VK_API_VERSION_1_0)
+#if NK_DEBUG
+			.request_validation_layers()
+			.set_debug_callback(
+			  [](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+					 VkDebugUtilsMessageTypeFlagsEXT messageType,
+					 const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+					 void* pUserData) -> VkBool32 
+				{
+					auto severity = vkb::to_string_message_severity(messageSeverity);
+					auto type = vkb::to_string_message_type(messageType);
+					printf("[%s: %s] %s\n", severity, type, pCallbackData->pMessage);
+					return VK_FALSE;
+				}
+			)
+#endif
 			.build();
 		if (!instanceBuilderRet)
 		{
@@ -45,8 +61,7 @@ namespace nk
 			return;
 		}
 
-		const vkb::Instance vkbInstance = instanceBuilderRet.value();
-		m_Instance = vk::UniqueInstance(vkbInstance.instance);
+		m_Instance = instanceBuilderRet.value();
 
 		auto systemInfoRet = vkb::SystemInfo::get_system_info();
 		if (!systemInfoRet)
@@ -60,5 +75,21 @@ namespace nk
 		{
 			std::cout << "\t" << extension.extensionName << std::endl;
 		}
+	}
+
+	void HelloTriangleApplication::SelectPhysicalDevice()
+	{
+		vkb::PhysicalDeviceSelector selector(m_Instance);
+		auto selectorRet = selector
+			.defer_surface_initialization()
+			.select();
+
+		if (!selectorRet)
+		{
+			std::cerr << "Failed to select physical device. Error: " << selectorRet.error().message() << std::endl;
+			return;
+		}
+
+		m_PhysicalDevice = selectorRet.value();
 	}
 }

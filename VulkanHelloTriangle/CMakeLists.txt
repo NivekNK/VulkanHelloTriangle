@@ -2,6 +2,12 @@
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
+add_compile_definitions(
+    $<$<CONFIG:Debug>:NK_DEBUG>
+    $<$<CONFIG:RelWithDebInfo>:NK_RELEASE>
+    $<$<CONFIG:Release>:NK_DIST>
+)
+
 find_package(Vulkan REQUIRED)
 
 add_subdirectory(vendor/GLFW)
