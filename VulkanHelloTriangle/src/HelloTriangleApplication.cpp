@@ -30,6 +30,7 @@ namespace nk
 	void HelloTriangleApplication::Cleanup()
 	{
 		vkb::destroy_instance(m_Instance);
+		vkb::destroy_device(m_Device);
 	}
 
 	void HelloTriangleApplication::CreateInstance()
@@ -91,5 +92,26 @@ namespace nk
 		}
 
 		m_PhysicalDevice = selectorRet.value();
+	}
+
+	void HelloTriangleApplication::CreateLogicalDevice()
+	{
+		vkb::DeviceBuilder deviceBuilder(m_PhysicalDevice);
+		auto deviceBuilderRet = deviceBuilder.build();
+		if (!deviceBuilderRet)
+		{
+			std::cerr << "Failed to create logical device. Error: " << deviceBuilderRet.error().message() << std::endl;
+			return;
+		}
+
+		m_Device = deviceBuilderRet.value();
+
+		auto queueRet = m_Device.get_queue(vkb::QueueType::graphics);
+		if (!queueRet)
+		{
+			std::cerr << "Failed to get graphics queue. Error: " << queueRet.error().message() << std::endl;
+			return;
+		}
+		m_GraphicsQueue = queueRet.value();
 	}
 }

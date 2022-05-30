@@ -27,9 +27,14 @@ namespace nk
 
 		void CreateInstance();
 		void SelectPhysicalDevice();
+		void CreateLogicalDevice();
 
 		vkb::Instance m_Instance;
 		vkb::PhysicalDevice m_PhysicalDevice;
+		vkb::Device m_Device;
+
+		vk::Queue m_GraphicsQueue;
+
 		std::unique_ptr<Window> m_Window;
 	};
 }
