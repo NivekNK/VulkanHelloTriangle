@@ -32,6 +32,7 @@ namespace nk
 
 	void HelloTriangleApplication::Cleanup()
 	{
+		m_Swapchain.destroy_image_views(m_SwapchainImageViews);
 		vkb::destroy_swapchain(m_Swapchain);
 		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
 		vkb::destroy_device(m_Device);
@@ -149,5 +150,25 @@ namespace nk
 		}
 
 		m_Swapchain = swapRet.value();
+
+		auto swapchainImages = m_Swapchain.get_images();
+		if (!swapchainImages)
+		{
+			std::cerr << "Failed to get swapchain images. Error: " << swapchainImages.error().message() << std::endl;
+		}
+		else
+		{
+			m_SwapchainImages = swapchainImages.value();
+		}
+
+		auto swapchainImageViews = m_Swapchain.get_image_views();
+		if (!swapchainImageViews)
+		{
+			std::cerr << "Failed to get swapchain image views. Error: " << swapchainImageViews.error().message() << std::endl;
+		}
+		else
+		{
+			m_SwapchainImageViews = swapchainImageViews.value();
+		}
 	}
 }

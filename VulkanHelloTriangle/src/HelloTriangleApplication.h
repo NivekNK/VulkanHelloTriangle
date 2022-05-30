@@ -39,7 +39,8 @@ namespace nk
 		vkb::Device m_Device;
 
 		vkb::Swapchain m_Swapchain;
-		std::vector<vk::Image> m_SwapchainImages;
+		std::vector<VkImage> m_SwapchainImages;
+		std::vector<VkImageView> m_SwapchainImageViews;
 
 		vk::Queue m_GraphicsQueue;
 		vk::Queue m_PresentQueue;
