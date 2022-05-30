@@ -16,7 +16,10 @@ namespace nk
 	void HelloTriangleApplication::InitVulkan()
 	{
 		CreateInstance();
+		CreateSurface();
 		SelectPhysicalDevice();
+		CreateLogicalDevice();
+		CreateSwapChain();
 	}
 
 	void HelloTriangleApplication::Update()
@@ -29,8 +32,10 @@ namespace nk
 
 	void HelloTriangleApplication::Cleanup()
 	{
-		vkb::destroy_instance(m_Instance);
+		vkb::destroy_swapchain(m_Swapchain);
+		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
 		vkb::destroy_device(m_Device);
+		vkb::destroy_instance(m_Instance);
 	}
 
 	void HelloTriangleApplication::CreateInstance()
@@ -78,11 +83,17 @@ namespace nk
 		}
 	}
 
+	void HelloTriangleApplication::CreateSurface()
+	{
+		m_Surface = m_Window->GetSurface(m_Instance.instance);
+	}
+
 	void HelloTriangleApplication::SelectPhysicalDevice()
 	{
 		vkb::PhysicalDeviceSelector selector(m_Instance);
 		auto selectorRet = selector
-			.defer_surface_initialization()
+			.set_surface(m_Surface)
+			.add_required_extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
 			.select();
 
 		if (!selectorRet)
@@ -106,12 +117,37 @@ namespace nk
 
 		m_Device = deviceBuilderRet.value();
 
-		auto queueRet = m_Device.get_queue(vkb::QueueType::graphics);
-		if (!queueRet)
+		auto graphicsQueue = m_Device.get_queue(vkb::QueueType::graphics);
+		if (!graphicsQueue)
 		{
-			std::cerr << "Failed to get graphics queue. Error: " << queueRet.error().message() << std::endl;
+			std::cerr << "Failed to get graphics queue. Error: " << graphicsQueue.error().message() << std::endl;
+		}
+		else
+		{
+			m_GraphicsQueue = graphicsQueue.value();
+		}
+
+		auto presentQueue = m_Device.get_queue(vkb::QueueType::present);
+		if (!presentQueue)
+		{
+			std::cerr << "Failed to get present queue. Error: " << presentQueue.error().message() << std::endl;
+		}
+		else
+		{
+			m_PresentQueue = presentQueue.value();
+		}
+	}
+
+	void HelloTriangleApplication::CreateSwapChain()
+	{
+		vkb::SwapchainBuilder swapchainBuilder(m_Device);
+		auto swapRet = swapchainBuilder.build();
+		if (!swapRet)
+		{
+			std::cerr << "Failed to create swapchain. Error: " << swapRet.error().message() << std::endl;
 			return;
 		}
-		m_GraphicsQueue = queueRet.value();
+
+		m_Swapchain = swapRet.value();
 	}
 }

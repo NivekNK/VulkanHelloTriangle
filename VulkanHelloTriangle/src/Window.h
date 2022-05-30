@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vulkan/vulkan.hpp>
+
 struct GLFWwindow;
 
 namespace nk
@@ -12,6 +14,8 @@ namespace nk
 
 		void Update();
 		bool ShouldClose() const;
+
+		vk::SurfaceKHR GetSurface(const vk::Instance& instance) const;
 	private:
 		unsigned int m_Width;
 		unsigned int m_Height;

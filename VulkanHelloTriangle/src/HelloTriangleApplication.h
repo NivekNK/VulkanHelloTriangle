@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <optional>
 
 #include "Window.h"
@@ -26,14 +27,22 @@ namespace nk
 		void Cleanup();
 
 		void CreateInstance();
+		void CreateSurface();
 		void SelectPhysicalDevice();
 		void CreateLogicalDevice();
+		void CreateSwapChain();
 
 		vkb::Instance m_Instance;
+		vk::SurfaceKHR m_Surface;
+
 		vkb::PhysicalDevice m_PhysicalDevice;
 		vkb::Device m_Device;
 
+		vkb::Swapchain m_Swapchain;
+		std::vector<vk::Image> m_SwapchainImages;
+
 		vk::Queue m_GraphicsQueue;
+		vk::Queue m_PresentQueue;
 
 		std::unique_ptr<Window> m_Window;
 	};

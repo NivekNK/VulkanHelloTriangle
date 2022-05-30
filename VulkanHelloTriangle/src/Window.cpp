@@ -1,7 +1,6 @@
 #include "Window.h"
 
 #define GLFW_INCLUDE_NONE
-#include <vulkan/vulkan.hpp>
 #include <GLFW/glfw3.h>
 
 namespace nk
@@ -31,5 +30,16 @@ namespace nk
 	bool Window::ShouldClose() const
 	{
 		return glfwWindowShouldClose(m_Window);
+	}
+
+	vk::SurfaceKHR Window::GetSurface(const vk::Instance& instance) const
+	{
+		VkSurfaceKHR surface;
+		if (glfwCreateWindowSurface(instance, m_Window, nullptr, &surface) != VK_SUCCESS)
+		{
+			throw std::runtime_error("Failed to create window surface!");
+		}
+
+		return surface;
 	}
 }
